@@ -15,6 +15,49 @@ etcd-user-group-home:
       - file: etcd-user-envfile
   {% endif %}
 
+# install certs if provided
+{%- if etcd.cert_src_path is defined and etcd.cert_dst_path is defined %}
+etcd-cert-dir:
+  file.directory:
+    - name: {{ etcd.cert_dst_path }}
+    - user: {{ etcd.user }}
+    - group: {{ etcd.group }}
+    - dirmode: 750
+    - filemode: 640
+    - makedirs: True
+    - require:
+      - user: {{ etcd.user or 'etcd' }}
+      - group: {{ etcd.group or 'etcd' }}
+
+{%- for file in
+  'apiserver-etcd-client-key.pem',
+  'apiserver-etcd-client.pem',
+  'etcdctl-etcd-client-key.pem',
+  'etcdctl-etcd-client.pem',
+  'server-key.pem',
+  'server.pem'
+%}
+"{{ etcd.cert_dst_path }}/{{ file }}":
+  file.managed:
+  - source: "{{ etcd.cert_src_path }}/{{ grains["nodename"] }}/{{ file }}"
+  - user: etcd
+  - group: etcd
+  - mode: 640
+  - require:
+    - file: etcd-cert-dir
+{%- endfor %}
+
+"{{ etcd.cert_dst_path }}/ca.pem":
+  file.managed:
+  - name: "{{ etcd.cert_dst_path }}/ca.pem"
+  - source: "{{ etcd.cert_src_path }}/ca.pem"
+  - user: etcd
+  - group: etcd
+  - mode: 640
+  - require:
+    - file: etcd-cert-dir
+{%- endif %}
+
 # Cleanup first
 etcd-remove-prev-archive:
   file.absent:
@@ -75,7 +118,11 @@ etcd-check-archive-hash:
      - require_in:
        - archive: etcd-install
     {%- endif %}
-
+{% elif etcd.use_upstream_repo|lower == 'custom' %}
+etcd-download-archive:
+  file.managed:
+    - name: "{{ etcd.tmpdir }}/{{ etcd.dl.archive_name }}"
+    - source: "{{ etcd.custom_download_url_prefix }}/{{ etcd.dl.archive_name }}"
 {% endif %}
 
 etcd-install:
@@ -83,7 +130,7 @@ etcd-install:
   pkg.installed:
     - name: {{ etcd.pkg }}
     - version: {{ etcd.version }}
-{% elif etcd.use_upstream_repo|lower == 'true' %}
+{% else %}
   archive.extracted:
     - source: 'file://{{ etcd.tmpdir }}/{{ etcd.dl.archive_name }}'
     - name: '{{ etcd.prefix }}'
@@ -92,10 +139,14 @@ etcd-install:
     - watch_in:
       - service: etcd_{{ etcd.service_name }}_running
     - onchanges:
+    {%- if etcd.use_upstream_repo|lower == 'custom' %}
+      - file: etcd-download-archive
+    {%- else %}
       - cmd: etcd-download-archive
+    {%- endif %}
     {%- if etcd.src_hashurl and grains['saltversioninfo'] > [2016, 11, 6] %}
     - source_hash: {{ etcd.src_hashurl }}
     {%- endif %}
-
+  
 {% endif %}
 
