@@ -4,7 +4,7 @@ Documentation=https://github.com/coreos/etcd
 After=network.target
 
 [Service]
-User=root
+User=etcd
 Type=notify
 
 {% for key,value in etcd.service.items() -%}
