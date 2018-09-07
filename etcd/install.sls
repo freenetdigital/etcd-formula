@@ -23,7 +23,7 @@ etcd-cert-dir:
     - user: {{ etcd.user }}
     - group: {{ etcd.group }}
     - dirmode: 750
-    - filemode: 640
+    - filemode: 644
     - makedirs: True
     - require:
       - user: {{ etcd.user or 'etcd' }}
@@ -42,7 +42,7 @@ etcd-cert-dir:
   - source: "{{ etcd.cert_src_path }}/{{ grains["nodename"] }}/{{ file }}"
   - user: etcd
   - group: etcd
-  - mode: 640
+  - mode: 644
   - require:
     - file: etcd-cert-dir
 {%- endfor %}
@@ -53,7 +53,7 @@ etcd-cert-dir:
   - source: "{{ etcd.cert_src_path }}/ca.pem"
   - user: etcd
   - group: etcd
-  - mode: 640
+  - mode: 644
   - require:
     - file: etcd-cert-dir
 {%- endif %}
