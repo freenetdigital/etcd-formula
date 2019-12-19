@@ -66,6 +66,7 @@ etcd-extract-dirs:
     - names:
       - {{ etcd.tmpdir }}
       - {{ etcd.prefix }}
+    - unless: test -f {{ etcd.realhome }}/{{ etcd.command }}
 
 etcd-other-dirs:
   file.directory:
