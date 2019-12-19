@@ -58,14 +58,21 @@ etcd-cert-dir:
     - file: etcd-cert-dir
 {%- endif %}
 
-etcd-extract-dirs:
+etcd-extract-dir:
+  file.directory:
+    - makedirs: True
+    - require_in:
+      - etcd-download-archive
+    - names:
+      - {{ etcd.prefix }}
+
+etcd-other-dirs:
   file.directory:
     - makedirs: True
     - require_in:
       - etcd-download-archive
     - names:
       - {{ etcd.tmpdir }}
-      - {{ etcd.prefix }}
       - {{ etcd.datadir }}
   {% if etcd.manage_users %}
     - user: {{ etcd.user or 'etcd' }}
