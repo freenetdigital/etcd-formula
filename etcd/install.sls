@@ -122,6 +122,7 @@ etcd-download-archive:
   file.managed:
     - name: "{{ etcd.tmpdir }}/{{ etcd.dl.archive_name }}"
     - source: "{{ etcd.custom_download_url_prefix }}/{{ etcd.dl.archive_name }}"
+    - unless: test -f {{ etcd.realhome }}{{ etcd.command }}
 {% endif %}
 
 etcd-install:
