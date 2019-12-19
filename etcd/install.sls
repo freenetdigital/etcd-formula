@@ -58,17 +58,9 @@ etcd-cert-dir:
     - file: etcd-cert-dir
 {%- endif %}
 
-# Cleanup first
-etcd-remove-prev-archive:
-  file.absent:
-    - name: {{ etcd.tmpdir }}{{ etcd.dl.archive_name }}
-    - require_in:
-      - etcd-extract-dirs
-
 etcd-extract-dirs:
   file.directory:
     - makedirs: True
-    - mode: '0775'
     - require_in:
       - etcd-download-archive
     - names:
