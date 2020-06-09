@@ -47,7 +47,6 @@ etcd-cert-dir:
     - file: etcd-cert-dir
 {%- endfor %}
 
-
 {%- for file in
   'server-key.pem',
   'server.pem'
@@ -62,6 +61,7 @@ etcd-cert-dir:
   - require:
     - file: etcd-cert-dir
 {%- endfor %}
+{%- endif %}
 
 etcd-extract-dirs:
   file.directory:
