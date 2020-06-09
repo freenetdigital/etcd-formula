@@ -34,8 +34,8 @@ etcd-cert-dir:
   'apiserver-etcd-client.pem',
   'etcdctl-etcd-client-key.pem',
   'etcdctl-etcd-client.pem',
-  'server-key.pem',
-  'server.pem'
+  'peer-key.pem',
+  'peer.pem'
 %}
 "{{ etcd.cert_dst_path }}/{{ file }}":
   file.managed:
@@ -47,16 +47,21 @@ etcd-cert-dir:
     - file: etcd-cert-dir
 {%- endfor %}
 
-"{{ etcd.cert_dst_path }}/ca.pem":
+
+{%- for file in
+  'server-key.pem',
+  'server.pem'
+  'ca.pem'
+%}
+"{{ etcd.cert_dst_path }}/{{ file }}":
   file.managed:
-  - name: "{{ etcd.cert_dst_path }}/ca.pem"
-  - source: "{{ etcd.cert_src_path }}/ca.pem"
+  - source: "{{ etcd.cert_src_path }}/{{ file }}"
   - user: etcd
   - group: etcd
   - mode: 644
   - require:
     - file: etcd-cert-dir
-{%- endif %}
+{%- endfor %}
 
 etcd-extract-dirs:
   file.directory:
