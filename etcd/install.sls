@@ -49,7 +49,7 @@ etcd-cert-dir:
 
 {%- for file in
   'server-key.pem',
-  'server.pem'
+  'server.pem',
   'ca.pem'
 %}
 "{{ etcd.cert_dst_path }}/{{ file }}":
